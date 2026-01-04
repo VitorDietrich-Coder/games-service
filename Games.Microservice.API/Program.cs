@@ -1,102 +1,136 @@
+using Elastic.Clients.Elasticsearch;
+using FGC.Infra.Data;
+using Games.Microservice.API.Elasticsearch;
+using Games.Microservice.API.Extensions;
+using Games.Microservice.Domain.Interfaces;
+using Games.Microservice.Infrastructure.Elasticsearch;
+using Games.Microservice.Infrastructure.EventStore;
+using Games.Microservice.Infrastructure.Interfaces;
 using Games.Microservice.Infrastructure.Messaging;
 using Games.Microservice.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Games.Microservice.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using Serilog;
+using System.Reflection;
+using Users.Microservice.API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Controllers
+
+
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddEnvironmentVariables();
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<GamesDbContext>(options =>
+    options.UseSqlServer(connectionString),
+    ServiceLifetime.Scoped);
+
+
+builder.Services.AddScoped<ApplicationDbContextInitialiser>();
+builder.Services.AddOpenTelemetryTracing(builder.Configuration);
+builder.Services.AddApiVersioningConfiguration();
+
 builder.Services.AddControllers();
-
-// Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new()
-    {
-        Title = "Games API",
-        Version = "v1",
-        Description = "Microsserviço de Games"
-    });
-});
 
-// Health Checks
+builder.Services.AddSwaggerServices();
+
+builder.Services.AddGlobalCorsPolicy();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddElasticSearch(builder.Configuration);
+builder.Services.AddScoped<IGameSearchRepository, GameSearchRepository>();
+
 builder.Services.AddHealthChecks();
 
-// JWT Authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Authority = builder.Configuration["Jwt:Authority"];
-        options.Audience = builder.Configuration["Jwt:Audience"];
-        options.RequireHttpsMetadata = false;
-    });
+builder.Services.AddApplication();
 
-// Authorization
 builder.Services.AddAuthorization();
 
-// RabbitMQ
-builder.Services.AddSingleton<RabbitMqEventBus>(sp =>
+builder.Host.UseSerilog((context, services, configuration) =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("RabbitMQ");
-    return new RabbitMqEventBus(connectionString);
+    SerilogExtensions.ConfigureSerilog(context, services, configuration);
 });
+builder.Services.AddCustomAuthentication(builder.Configuration);
 
-// DbContext (Games)
-builder.Services.AddDbContext<GamesDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddScoped<IGameRepository, GameRepository>();
+builder.Services.AddScoped<IEventStore, StoredEvents>();
+builder.Services.AddSingleton<IEventBus>(sp =>
+{
+    return new RabbitMqEventBus(builder.Configuration);
+});
+ 
+builder.Services.AddSingleton(sp =>
+{
+    var settings = new ElasticsearchClientSettings(
+        new Uri(builder.Configuration["ElasticSearch:Uri"]!)
+    );
 
-// MediatR handlers (ex: Commands/Handlers)
-builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+    return new ElasticsearchClient(settings);
+});
 
 var app = builder.Build();
 
-// Middleware: Correlation ID
-app.Use(async (context, next) =>
+using (var scope = app.Services.CreateScope())
 {
-    if (!context.Request.Headers.ContainsKey("X-Correlation-Id"))
-        context.Request.Headers.Add("X-Correlation-Id", Guid.NewGuid().ToString());
-
-    context.Response.Headers.Add(
-        "X-Correlation-Id",
-        context.Request.Headers["X-Correlation-Id"].ToString());
-
-    await next();
-});
-
-// Exception handling
-app.UseExceptionHandler(errorApp =>
-{
-    errorApp.Run(async context =>
+    try
     {
-        context.Response.StatusCode = 500;
-        await context.Response.WriteAsJsonAsync(new { error = "Internal server error" });
-    });
-});
+        var initialiser = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitialiser>();
+        initialiser.Initialise();
+        initialiser.Seed();
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred during database initialisation.");
+
+        throw;
+    }
+
+}
 
 // Swagger
-if (app.Environment.IsDevelopment())
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI(c =>
+//    {
+//        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Games API v1");
+//        c.RoutePrefix = string.Empty;
+//    });
+//}
+
+
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Games API v1");
-        c.RoutePrefix = string.Empty;
-    });
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Users API v1");
+
+    options.RoutePrefix = string.Empty;
+});
+
+app.UseRouting();
+
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
-app.UseAuthorization();
 
-// Health Checks
 app.MapHealthChecks("/health");
 
-// Controllers
+app.UseAuthentication();
+app.UseMiddleware<UnauthorizedResponseMiddleware>();
+app.UseAuthorization();
+
+ 
 app.MapControllers();
+ 
 
 app.Run();
+

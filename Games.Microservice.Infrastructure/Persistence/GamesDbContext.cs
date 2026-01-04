@@ -1,10 +1,8 @@
 ﻿using Games.Microservice.Domain.Entities;
+using Games.Microservice.Infrastructure.EventStore;
+using Games.Microservice.Infrastructure.MapEntities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Users.Microservice.Domain.Core.Events;
 
 namespace Games.Microservice.Infrastructure.Persistence
 {
@@ -14,6 +12,22 @@ namespace Games.Microservice.Infrastructure.Persistence
             : base(options) { }
 
         public DbSet<Game> Games => Set<Game>();
-    }
+        public DbSet<StoredEvent> StoredEvents => Set<StoredEvent>();
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Ignore<DomainEvent>();
+            modelBuilder.Ignore<List<DomainEvent>>();
+            modelBuilder.Ignore<IReadOnlyCollection<DomainEvent>>();
+
+            modelBuilder.ApplyConfigurationsFromAssembly(
+                typeof(GamesConfiguration).Assembly
+            );
+
+        }
+
+
+    }
 }

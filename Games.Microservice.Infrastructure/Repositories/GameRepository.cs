@@ -2,11 +2,7 @@
 using Games.Microservice.Domain.Interfaces;
 using Games.Microservice.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Nest;
 
 namespace Games.Microservice.Infrastructure.Repositories
 {
@@ -36,20 +32,34 @@ namespace Games.Microservice.Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        public Task AddAsync(Game game)
+        public async Task AddAsync(Game user)
         {
-            throw new NotImplementedException();
+            await _context.Games.AddAsync(user);
+            await Task.CompletedTask;
         }
 
-        public Task UpdateAsync(Game game)
+
+        public async Task<Game?> UpdateAsync(Game game)
         {
-            throw new NotImplementedException();
+            var existingGame = await _context.Games
+                .FirstOrDefaultAsync(u => u.Id == game.Id);
+
+            if (existingGame is null)
+                return null;
+
+            _context.Entry(existingGame).CurrentValues.SetValues(game);
+
+            return existingGame;
         }
 
         public Task<bool> ExistsAsync(Guid id)
         {
             throw new NotImplementedException();
         }
+
+        public async Task<Game?> GetByNameAsync(string name)
+            => await _context.Games.FindAsync(name);
+
     }
 
 }

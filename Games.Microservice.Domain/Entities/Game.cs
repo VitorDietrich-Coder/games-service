@@ -4,62 +4,52 @@ using Games.Microservice.Domain.ValueObjects;
 
 namespace Games.Microservice.Domain.Entities;
 
-public class Game : AggregateRoot
+public class Game : Entity
 {
-    private readonly List<IDomainEvent> _events = new();
-
-    protected Game() { } // EF
+ 
+    public Game() { }  
 
     public Game(
-        string title,
-        string genre,
-        Money price)
+        string name,
+        string category,
+        CurrencyAmount price)
     {
         Id = Guid.NewGuid();
-        Title = ValidateTitle(title);
-        Genre = ValidateGenre(genre);
+        Name = ValidateName(name);
+        Category = ValidateCategory(category);
         Price = price;
         Purchases = 0;
         CreatedAt = DateTime.UtcNow;
     }
 
-    public Guid Id { get; private set; }
-    public string Title { get; private set; }
-    public string Genre { get; private set; }
-    public Money Price { get; private set; }
-    public int Purchases { get; private set; }
-    public DateTime CreatedAt { get; private set; }
+    public Guid Id { get;  set; }
+    public string Name { get;  set; }
+    public string Category { get;  set; }
+    public CurrencyAmount Price { get;  set; }
+    public int Purchases { get;  set; }
+    public DateTime CreatedAt { get;  set; }
 
 
     public void RegisterPurchase()
     {
         Purchases++;
 
-        AddDomainEvent(new GamePurchasedEvent(Id));
+        AddDomainEvent(new GamePurchasedDomainEvent(Id));
     }
-
-
-    public IReadOnlyCollection<IDomainEvent> DomainEvents => _events.AsReadOnly();
-
-    protected void AddDomainEvent(IDomainEvent @event)
-        => _events.Add(@event);
-
-    public void ClearDomainEvents()
-        => _events.Clear();
-
-    private static string ValidateTitle(string title)
+ 
+    private static string ValidateName(string name)
     {
-        if (string.IsNullOrWhiteSpace(title))
+        if (string.IsNullOrWhiteSpace(name))
             throw new Exception("Game title is required");
 
-        return title;
+        return name;
     }
 
-    private static string ValidateGenre(string genre)
+    private static string ValidateCategory(string Category)
     {
-        if (string.IsNullOrWhiteSpace(genre))
-            throw new Exception("Game genre is required");
+        if (string.IsNullOrWhiteSpace(Category))
+            throw new Exception("Game Category is required");
 
-        return genre;
+        return Category;
     }
 }

@@ -1,10 +1,15 @@
-﻿ 
+﻿
+
+using Users.Microservice.Domain.Core.Events;
 
 namespace Games.Microservice.Domain.Events;
 
-public record GamePurchasedEvent(
-    Guid GameId
-) : IDomainEvent
+public sealed class GamePurchasedDomainEvent : DomainEvent
 {
-    public DateTime OccurredOn { get; } = DateTime.UtcNow;
+    public Guid AggregateId { get; }
+
+    public GamePurchasedDomainEvent(Guid aggregateId) : base(aggregateId)
+    {
+        AggregateId = aggregateId;
+    }
 }

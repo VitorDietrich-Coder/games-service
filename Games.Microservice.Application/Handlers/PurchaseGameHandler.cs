@@ -1,7 +1,7 @@
 ﻿using Games.Microservice.Application.Commands;
 using Games.Microservice.Domain.Events;
 using Games.Microservice.Domain.Interfaces;
-using Games.Microservice.Infrastructure.Messaging;
+using Games.Microservice.Infrastructure.Interfaces;
 using MediatR;
 using System;
 using System.Collections.Generic;
