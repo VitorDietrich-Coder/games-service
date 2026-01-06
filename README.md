@@ -71,7 +71,7 @@ Senha: 1GamesAdmin@
 
 ##  📄 Documentação
 
-🛠️ Event Storming: https://miro.com/app/board/uXjVJXr1M14=/
+ 
 
 ##  🐳 Rodando a Aplicação com docker
 Rode no console:
