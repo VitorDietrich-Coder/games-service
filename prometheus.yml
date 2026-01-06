@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'Users.Microservice.API'
+    static_configs:
+      - targets: ['54.89.66.1:8080']
