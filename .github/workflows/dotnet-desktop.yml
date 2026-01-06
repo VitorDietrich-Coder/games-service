@@ -20,7 +20,7 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: 🔧 Restaurar e compilar solução
-      run: dotnet build games-service/Games.Microservice.API/Games.Microservice.API.sln  --configuration Release
+      run: dotnet build Games.Microservice.API/Games.Microservice.API.sln  --configuration Release
       
   test:
     name: ✅ Testes Unitários
