@@ -4,7 +4,6 @@ using Games.Microservice.Application.Games.Models.Response;
 using Games.Microservice.Domain.Entities;
 using Games.Microservice.Domain.Interfaces;
 using Games.Microservice.Domain.ValueObjects;
-using Games.Microservice.Infrastructure.Persistence;
 using MediatR;
 
 namespace Games.Microservice.Application.Handlers;

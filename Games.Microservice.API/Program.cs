@@ -1,7 +1,7 @@
 using Elastic.Clients.Elasticsearch;
-using FGC.Infra.Data;
 using Games.Microservice.API.Elasticsearch;
 using Games.Microservice.API.Extensions;
+using Games.Microservice.Application.EventConsumers;
 using Games.Microservice.Domain.Interfaces;
 using Games.Microservice.Infrastructure.Elasticsearch;
 using Games.Microservice.Infrastructure.EventStore;
@@ -62,6 +62,10 @@ builder.Services.AddCustomAuthentication(builder.Configuration);
 
 builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddScoped<IEventStore, StoredEvents>();
+builder.Services.AddScoped<PaymentConfirmedConsumer>();
+
+builder.Services.AddHostedService<PaymentCompletedRabbitConsumer>();
+
 builder.Services.AddSingleton<IEventBus>(sp =>
 {
     return new RabbitMqEventBus(builder.Configuration);
@@ -111,7 +115,7 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Users API v1");
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Games API v1");
 
     options.RoutePrefix = string.Empty;
 });

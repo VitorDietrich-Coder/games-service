@@ -14,8 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Games.Microservice.Contracts\Games.Microservice.Contracts.csproj" />
     <ProjectReference Include="..\Games.Microservice.Domain\Games.Microservice.Domain.csproj" />
-    <ProjectReference Include="..\Games.Microservice.Infrastructure\Games.Microservice.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

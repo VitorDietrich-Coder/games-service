@@ -33,12 +33,13 @@ namespace Games.Microservice.Infrastructure.MapEntities
             {
                 price.Property(p => p.Value)
                      .HasColumnName("Price")
+                     .HasPrecision(18, 2)  
                      .IsRequired();
 
                 price.Property(p => p.Currency)
                      .HasColumnName("PriceCurrency")
-                     .IsRequired()
-                     .HasMaxLength(3);
+                     .HasMaxLength(3)
+                     .IsRequired();
             });
 
             builder.Property(u => u.CreatedAt)

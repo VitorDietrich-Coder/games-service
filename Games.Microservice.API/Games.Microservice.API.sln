@@ -27,6 +27,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Games.Microservice.shared",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{42A78662-ACDA-448A-9E02-662C94D06741}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Games.Microservice.Contracts", "..\Games.Microservice.Contracts\Games.Microservice.Contracts.csproj", "{98017803-0BE5-42EC-B607-323AD5C3F563}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{2DEF98DE-3406-4435-BDA4-C5FF66F003E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +61,10 @@ Global
 		{C900493F-25FC-44DA-ADA5-E598C8921325}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C900493F-25FC-44DA-ADA5-E598C8921325}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C900493F-25FC-44DA-ADA5-E598C8921325}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98017803-0BE5-42EC-B607-323AD5C3F563}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98017803-0BE5-42EC-B607-323AD5C3F563}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98017803-0BE5-42EC-B607-323AD5C3F563}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98017803-0BE5-42EC-B607-323AD5C3F563}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,6 +76,7 @@ Global
 		{FCB09055-0CE2-4988-97DB-81F2017830C6} = {9DF15371-99DC-4B2E-8804-5BFB7DDB1B65}
 		{62683D9B-0062-49E8-A57B-CE3C56A753DE} = {9F670EAC-4D8D-463E-B0C9-F4DC0281DC5C}
 		{C900493F-25FC-44DA-ADA5-E598C8921325} = {42A78662-ACDA-448A-9E02-662C94D06741}
+		{98017803-0BE5-42EC-B607-323AD5C3F563} = {2DEF98DE-3406-4435-BDA4-C5FF66F003E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A2C81289-2EF7-4A43-A5E7-51A1DE949CA4}

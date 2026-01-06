@@ -33,12 +33,10 @@ public sealed class RabbitMqEventBus : IEventBus, IDisposable
     public Task PublishAsync<TEvent>(TEvent @event, string queueName)
         where TEvent : class
     {
-        _channel.QueueDeclare(
-            queue: queueName,
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null);
+        _channel.ExchangeDeclare(
+           exchange: "games.events",
+           type: ExchangeType.Topic,
+           durable: true);
 
         var body = Encoding.UTF8.GetBytes(
             JsonSerializer.Serialize(@event));
@@ -58,8 +56,8 @@ public sealed class RabbitMqEventBus : IEventBus, IDisposable
         }
 
         _channel.BasicPublish(
-            exchange: "",
-            routingKey: queueName,
+            exchange: "games.events",
+            routingKey: "game.purchased",
             basicProperties: properties,
             body: body);
 

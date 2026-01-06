@@ -34,13 +34,12 @@ namespace Games.Microservice.Application.Handlers
             if (game is null)
                 throw new Exception("Jogo não encontrado");
 
-      
-
+                
             await _eventBus.PublishAsync(new GamePurchaseRequestedEvent(
                 game.Id,
                 request.UserId,
-                game.Price
-            ), "Purchase Game");
+                game.Price.Value
+            ), "games.events");
 
             return true;
         }

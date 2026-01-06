@@ -22,7 +22,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Games.Microservice.Application\Games.Microservice.Application.csproj" />
+    <ProjectReference Include="..\Games.Microservice.Contracts\Games.Microservice.Contracts.csproj" />
     <ProjectReference Include="..\Games.Microservice.Domain\Games.Microservice.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DTOs\" />
   </ItemGroup>
 
 </Project>

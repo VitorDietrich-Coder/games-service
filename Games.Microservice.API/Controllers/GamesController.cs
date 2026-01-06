@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Security.Claims;
 
 namespace Games.Microservice.API.Controllers
 {
@@ -57,8 +58,7 @@ namespace Games.Microservice.API.Controllers
         [HttpPost("{gameId}/purchase")]
         public async Task<IActionResult> Purchase(Guid gameId)
         {
-            var userId = Guid.Parse(User.FindFirst("sub")!.Value);
-
+            var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var result = await Mediator.Send(
                 new PurchaseGameCommand(gameId, userId));
 

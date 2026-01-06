@@ -1,8 +1,7 @@
 using FluentValidation;
 using Games.Microservice.Application.Commands.CreateGame;
 using Games.Microservice.Domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
-
+ 
 
 namespace FGC.Application.Games.Commands.CreateGame
 {

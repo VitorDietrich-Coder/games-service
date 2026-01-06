@@ -1,4 +1,4 @@
-﻿namespace Games.Microservice.Infrastructure.Persistence
+﻿namespace Games.Microservice.Domain.Interfaces
 {
     public interface IUnitOfWork
     {

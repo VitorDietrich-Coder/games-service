@@ -1,10 +1,9 @@
 ﻿using Games.Microservice.Domain.Entities;
 using Games.Microservice.Domain.ValueObjects;
-using Games.Microservice.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+ 
 
-namespace FGC.Infra.Data;
+namespace Games.Microservice.Infrastructure.Persistence;
 
 public class ApplicationDbContextInitialiser
 {

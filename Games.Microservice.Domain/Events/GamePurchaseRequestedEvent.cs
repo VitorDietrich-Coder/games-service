@@ -10,7 +10,7 @@ namespace Games.Microservice.Domain.Events
     public record GamePurchaseRequestedEvent(
         Guid GameId,
         Guid UserId,
-        CurrencyAmount Price
+        decimal Price
     );
 
 }

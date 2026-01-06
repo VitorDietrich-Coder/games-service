@@ -43,6 +43,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Games.Microservice.Application\Games.Microservice.Application.csproj" />
+    <ProjectReference Include="..\Games.Microservice.Infrastructure\Games.Microservice.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
