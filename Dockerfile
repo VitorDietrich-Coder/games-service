@@ -57,4 +57,4 @@ ENTRYPOINT ["dotnet", "ef", "database", "update", "--no-build"]
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "Users.Microservice.API.dll"]
+ENTRYPOINT ["dotnet", "Games.Microservice.API.dll"]
