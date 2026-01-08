@@ -23,7 +23,7 @@ public sealed class PaymentCompletedRabbitConsumer : BackgroundService
         IServiceScopeFactory scopeFactory,
         ILogger<PaymentCompletedRabbitConsumer> logger)
     {
-        _configuration = configuration;
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         _scopeFactory = scopeFactory;
         _logger = logger;
     }
