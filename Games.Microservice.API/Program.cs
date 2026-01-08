@@ -47,6 +47,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddElasticSearch(builder.Configuration);
 builder.Services.AddScoped<IGameSearchRepository, GameSearchRepository>();
+builder.Services.AddScoped<IUserPurchaseSearchRepository, UserPurchaseSearchRepository>();
 
 builder.Services.AddHealthChecks();
 

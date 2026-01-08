@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Games.Microservice.Application.Behaviours;
+using Games.Microservice.Application.Queries;
 using MediatR;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -13,7 +14,7 @@ public static class ConfigureServices
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(
-                typeof(ApplicationAssemblyMarker).Assembly
+             typeof(ApplicationAssemblyMarker).Assembly
             );
         });
 

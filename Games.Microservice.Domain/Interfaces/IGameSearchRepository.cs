@@ -1,5 +1,6 @@
-﻿using Games.Microservice.Domain.Entities;
-using Games.Microservice.Infrastructure.Search.DTOs;
+﻿using Games.Microservice.Domain.DTOs;
+using Games.Microservice.Domain.Entities;
+ 
 
 namespace Games.Microservice.Domain.Interfaces
 {

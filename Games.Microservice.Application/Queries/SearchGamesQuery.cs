@@ -1,4 +1,4 @@
-﻿using Games.Microservice.Infrastructure.Search.DTOs;
+﻿using Games.Microservice.Domain.DTOs;
 using MediatR;
 using System;
 using System.Collections.Generic;

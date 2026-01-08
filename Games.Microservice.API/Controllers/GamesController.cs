@@ -50,7 +50,7 @@ namespace Games.Microservice.API.Controllers
 
         public async Task<IActionResult> Recommend()
         {
-            var userId = Guid.Parse(User.FindFirst("sub")!.Value);
+            var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             return Ok(await Mediator.Send(new GetRecommendedGamesQuery(userId)));
         }
 

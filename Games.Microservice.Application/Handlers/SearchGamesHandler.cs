@@ -1,7 +1,7 @@
 ﻿using Games.Microservice.Application.Queries;
+using Games.Microservice.Domain.DTOs;
 using Games.Microservice.Domain.Interfaces;
 using Games.Microservice.Infrastructure.Interfaces;
-using Games.Microservice.Infrastructure.Search.DTOs;
 using MediatR;
 
 namespace Games.Microservice.Application.Handlers

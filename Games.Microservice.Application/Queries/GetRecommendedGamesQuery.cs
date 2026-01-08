@@ -1,4 +1,5 @@
-﻿using Games.Microservice.Domain.Entities;
+﻿using Games.Microservice.Domain.DTOs;
+using Games.Microservice.Domain.Entities;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -9,5 +10,5 @@ using System.Threading.Tasks;
 namespace Games.Microservice.Application.Queries
 {
     public record GetRecommendedGamesQuery(Guid id)
-        : IRequest<IEnumerable<Game>>;
+        : IRequest<IEnumerable<GameSearchDto>>;
 }

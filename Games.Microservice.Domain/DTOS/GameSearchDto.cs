@@ -1,14 +1,16 @@
-﻿namespace Games.Microservice.Infrastructure.Search.DTOs;
+﻿using Games.Microservice.Domain.ValueObjects;
+
+namespace Games.Microservice.Domain.DTOs;
 
 public class GameSearchDto
 {
     public Guid Id { get; set; }
 
-    public string Title { get; set; } = default!;
+    public string Name { get; set; } = default!;
 
-    public string Genre { get; set; } = default!;
+    public string Category { get; set; } = default!;
 
-    public decimal Price { get; set; }
+    public CurrencyAmount Price { get; set; }
 
     public string Currency { get; set; } = default!;
 
