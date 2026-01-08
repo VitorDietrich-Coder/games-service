@@ -30,7 +30,7 @@ public sealed class PaymentCompletedRabbitConsumer : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Connected to RabbitMQ successfully: " + _configuration);
+        _logger.LogInformation("Connected to RabbitMQ successfully: " + _configuration["RabbitMq:ConnectionString"]);
 
         var factory = new ConnectionFactory
         {
