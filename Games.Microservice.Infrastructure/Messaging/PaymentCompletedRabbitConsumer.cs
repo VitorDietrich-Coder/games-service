@@ -1,6 +1,4 @@
-﻿using System.Text;
-using System.Text.Json;
-using Games.Microservice.Application.EventConsumers;
+﻿using Games.Microservice.Application.EventConsumers;
 using Games.Microservice.Contracts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +6,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Text;
+using System.Text.Json;
 
 public sealed class PaymentCompletedRabbitConsumer : BackgroundService
 {
@@ -15,8 +15,8 @@ public sealed class PaymentCompletedRabbitConsumer : BackgroundService
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<PaymentCompletedRabbitConsumer> _logger;
 
-    private IConnection _connection = default!;
-    private IModel _channel = default!;
+    private IConnection? _connection;
+    private IModel? _channel;
 
     public PaymentCompletedRabbitConsumer(
         IConfiguration configuration,
@@ -28,17 +28,42 @@ public sealed class PaymentCompletedRabbitConsumer : BackgroundService
         _logger = logger;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-       
         var factory = new ConnectionFactory
         {
             Uri = new Uri(_configuration["RabbitMq:ConnectionString"]),
             DispatchConsumersAsync = true
         };
 
-        _connection = factory.CreateConnection();
-        _channel = _connection.CreateModel();
+        int attempts = 0;
+        const int maxAttempts = 10;
+
+        while (attempts < maxAttempts && !stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                _connection = factory.CreateConnection();
+                _channel = _connection.CreateModel();
+                _logger.LogInformation("Connected to RabbitMQ successfully!");
+                break;
+            }
+            catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException ex)
+            {
+                attempts++;
+                _logger.LogWarning(
+                    "RabbitMQ not reachable (attempt {Attempt}/{MaxAttempts}): {Message}",
+                    attempts, maxAttempts, ex.Message);
+
+                await Task.Delay(3000, stoppingToken);
+            }
+        }
+
+        if (_connection == null || _channel == null)
+        {
+            _logger.LogError("Could not connect to RabbitMQ after {MaxAttempts} attempts", maxAttempts);
+            return;
+        }
 
         _channel.ExchangeDeclare(
             exchange: "payments.events",
@@ -62,14 +87,13 @@ public sealed class PaymentCompletedRabbitConsumer : BackgroundService
         {
             using var scope = _scopeFactory.CreateScope();
 
-            var handler = scope.ServiceProvider
-                .GetRequiredService<PaymentConfirmedConsumer>();
+            var handler = scope.ServiceProvider.GetRequiredService<PaymentConfirmedConsumer>();
 
             var json = Encoding.UTF8.GetString(args.Body.ToArray());
-            var @event =
-                JsonSerializer.Deserialize<PaymentCompletedIntegrationEvent>(json);
+            var @event = JsonSerializer.Deserialize<PaymentCompletedIntegrationEvent>(json);
 
-            await handler.Handle(@event!);
+            if (@event != null)
+                await handler.Handle(@event);
 
             _channel.BasicAck(args.DeliveryTag, false);
         };
@@ -79,19 +103,23 @@ public sealed class PaymentCompletedRabbitConsumer : BackgroundService
             autoAck: false,
             consumer: consumer);
 
-        _logger.LogInformation(
-            "Listening to payment.completed events");
-
-        return Task.CompletedTask;
+        _logger.LogInformation("Listening to payment.completed events");
     }
 
     public override void Dispose()
     {
-        if (_channel.IsOpen)
-            _channel.Close();
+        try
+        {
+            if (_channel?.IsOpen ?? false)
+                _channel.Close();
 
-        if (_connection.IsOpen)
-            _connection.Close();
+            if (_connection?.IsOpen ?? false)
+                _connection.Close();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("Exception on disposing RabbitMQ connection: {Message}", ex.Message);
+        }
 
         base.Dispose();
     }
