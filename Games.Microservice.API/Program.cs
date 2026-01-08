@@ -16,14 +16,6 @@ using Users.Microservice.API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-
-builder.Configuration
-    .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
-    .AddEnvironmentVariables();
-
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<GamesDbContext>(options =>
@@ -64,14 +56,12 @@ builder.Services.AddCustomAuthentication(builder.Configuration);
 builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddScoped<IEventStore, StoredEvents>();
 builder.Services.AddScoped<PaymentConfirmedConsumer>();
-
-builder.Services.AddHostedService<PaymentCompletedRabbitConsumer>();
-
 builder.Services.AddSingleton<IEventBus>(sp =>
 {
     return new RabbitMqEventBus(builder.Configuration);
 });
- 
+builder.Services.AddHostedService<PaymentCompletedRabbitConsumer>();
+
 builder.Services.AddSingleton(sp =>
 {
     var settings = new ElasticsearchClientSettings(

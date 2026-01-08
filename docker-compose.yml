@@ -7,7 +7,7 @@ services:
       - "8080:80"
     environment:
       ASPNETCORE_URLS: http://+:80
-      ConnectionStrings__DefaultConnection: Server=sqlserver;Database=DB_Games;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;
+      ConnectionStrings__DefaultConnection: Server=sqlserver;Database=dbgames;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;
       RabbitMq__ConnectionString: amqp://guest:guest@rabbitmq:5672/
       Elasticsearch__Url: http://elasticsearch:9200
     networks:

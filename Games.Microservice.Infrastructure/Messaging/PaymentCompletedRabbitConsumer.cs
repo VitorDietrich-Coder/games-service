@@ -30,6 +30,7 @@ public sealed class PaymentCompletedRabbitConsumer : BackgroundService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
+       
         var factory = new ConnectionFactory
         {
             Uri = new Uri(_configuration["RabbitMq:ConnectionString"]),
