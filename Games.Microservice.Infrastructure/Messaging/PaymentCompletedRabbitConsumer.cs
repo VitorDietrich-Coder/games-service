@@ -1,6 +1,7 @@
 ﻿using Games.Microservice.Application.EventConsumers;
+using Games.Microservice.Infrastructure.Messaging;
+using Games.Microservice.Infrastructure.Interfaces;
 using Games.Microservice.Contracts;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -11,80 +12,48 @@ using System.Text.Json;
 
 public sealed class PaymentCompletedRabbitConsumer : BackgroundService
 {
-    private readonly IConfiguration _configuration;
+    private readonly IEventBus _eventBus;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<PaymentCompletedRabbitConsumer> _logger;
 
-    private IConnection? _connection;
-    private IModel? _channel;
-
     public PaymentCompletedRabbitConsumer(
-        IConfiguration configuration,
+        IEventBus eventBus,
         IServiceScopeFactory scopeFactory,
         ILogger<PaymentCompletedRabbitConsumer> logger)
     {
-        _configuration = configuration;
+        _eventBus = eventBus;
         _scopeFactory = scopeFactory;
         _logger = logger;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Connected to RabbitMQ successfully: " + _configuration["RabbitMq:ConnectionString"]);
-
-        var factory = new ConnectionFactory
+        if (_eventBus is not RabbitMqEventBus rabbitBus)
         {
-
-            Uri = new Uri(_configuration["RabbitMq:ConnectionString"]),
-            DispatchConsumersAsync = true
-        };
-
-        int attempts = 0;
-        const int maxAttempts = 10;
-
-        while (attempts < maxAttempts && !stoppingToken.IsCancellationRequested)
-        {
-            try
-            {
-                _connection = factory.CreateConnection();
-                _channel = _connection.CreateModel();
-                _logger.LogInformation("Connected to RabbitMQ successfully!");
-                break;
-            }
-            catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException ex)
-            {
-                attempts++;
-                _logger.LogWarning(
-                    "RabbitMQ not reachable (attempt {Attempt}/{MaxAttempts}): {Message}",
-                    attempts, maxAttempts, ex.Message);
-
-                await Task.Delay(3000, stoppingToken);
-            }
+            _logger.LogError("RabbitMqEventBus is not available. Consumer cannot start.");
+            return Task.CompletedTask;
         }
 
-        if (_connection == null || _channel == null)
-        {
-            _logger.LogError("Could not connect to RabbitMQ after {MaxAttempts} attempts", maxAttempts);
-            return;
-        }
+        var channel = rabbitBus.Channel;
 
-        _channel.ExchangeDeclare(
+        // Declare exchange e queue (idempotente)
+        channel.ExchangeDeclare(
             exchange: "payments.events",
             type: ExchangeType.Topic,
             durable: true);
 
-        _channel.QueueDeclare(
+        channel.QueueDeclare(
             queue: "payments.payment.completed",
             durable: true,
             exclusive: false,
             autoDelete: false);
 
-        _channel.QueueBind(
+        channel.QueueBind(
             queue: "payments.payment.completed",
             exchange: "payments.events",
             routingKey: "payment.completed");
 
-        var consumer = new AsyncEventingBasicConsumer(_channel);
+        var consumer = new AsyncEventingBasicConsumer(channel);
 
         consumer.Received += async (_, args) =>
         {
@@ -96,34 +65,32 @@ public sealed class PaymentCompletedRabbitConsumer : BackgroundService
             var @event = JsonSerializer.Deserialize<PaymentCompletedIntegrationEvent>(json);
 
             if (@event != null)
-                await handler.Handle(@event);
-
-            _channel.BasicAck(args.DeliveryTag, false);
+            {
+                try
+                {
+                    await handler.Handle(@event);
+                    channel.BasicAck(args.DeliveryTag, false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing payment.completed event");
+                    // Aqui você pode escolher requeue = true/false dependendo da lógica
+                    channel.BasicNack(args.DeliveryTag, false, requeue: true);
+                }
+            }
+            else
+            {
+                channel.BasicAck(args.DeliveryTag, false);
+            }
         };
 
-        _channel.BasicConsume(
+        channel.BasicConsume(
             queue: "payments.payment.completed",
             autoAck: false,
             consumer: consumer);
 
-        _logger.LogInformation("Listening to payment.completed events");
-    }
+        _logger.LogInformation("PaymentCompletedRabbitConsumer is listening to payment.completed events.");
 
-    public override void Dispose()
-    {
-        try
-        {
-            if (_channel?.IsOpen ?? false)
-                _channel.Close();
-
-            if (_connection?.IsOpen ?? false)
-                _connection.Close();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning("Exception on disposing RabbitMQ connection: {Message}", ex.Message);
-        }
-
-        base.Dispose();
+        return Task.CompletedTask;
     }
 }

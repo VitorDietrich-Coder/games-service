@@ -10,7 +10,8 @@ namespace Games.Microservice.Infrastructure.Messaging;
 public sealed class RabbitMqEventBus : IEventBus, IDisposable
 {
     private readonly IConnection _connection;
-    private readonly IModel _channel;
+    public readonly IModel _channel;
+    public IModel Channel => _channel; 
 
     public RabbitMqEventBus(IConfiguration configuration)
     {
