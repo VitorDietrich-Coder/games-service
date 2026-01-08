@@ -56,11 +56,12 @@ builder.Services.AddCustomAuthentication(builder.Configuration);
 builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddScoped<IEventStore, StoredEvents>();
 builder.Services.AddScoped<PaymentConfirmedConsumer>();
+builder.Services.AddHostedService<PaymentCompletedRabbitConsumer>();
+
 builder.Services.AddSingleton<IEventBus>(sp =>
 {
     return new RabbitMqEventBus(builder.Configuration);
 });
-builder.Services.AddHostedService<PaymentCompletedRabbitConsumer>();
 
 builder.Services.AddSingleton(sp =>
 {
