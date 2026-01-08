@@ -23,15 +23,18 @@ public sealed class PaymentCompletedRabbitConsumer : BackgroundService
         IServiceScopeFactory scopeFactory,
         ILogger<PaymentCompletedRabbitConsumer> logger)
     {
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _configuration = configuration;
         _scopeFactory = scopeFactory;
         _logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _logger.LogInformation("Connected to RabbitMQ successfully: " + _configuration);
+
         var factory = new ConnectionFactory
         {
+
             Uri = new Uri(_configuration["RabbitMq:ConnectionString"]),
             DispatchConsumersAsync = true
         };
