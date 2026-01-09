@@ -62,7 +62,7 @@ builder.Services.AddSingleton<IEventBus>(sp =>
     return new RabbitMqEventBus(builder.Configuration);
 });
 
-builder.Services.AddHostedService<PaymentCompletedRabbitConsumer>();
+//builder.Services.AddHostedService<PaymentCompletedRabbitConsumer>();
 
 
 builder.Services.AddSingleton(sp =>
