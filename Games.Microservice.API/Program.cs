@@ -57,13 +57,11 @@ builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddScoped<IEventStore, StoredEvents>();
 builder.Services.AddScoped<PaymentConfirmedConsumer>();
 
-builder.Services.AddSingleton<IEventBus>(sp =>
-{
-    return new RabbitMqEventBus(builder.Configuration);
-});
+builder.Services.AddSingleton<IRabbitMqConnection, RabbitMqConnection>();
+builder.Services.AddSingleton<IEventBus, RabbitMqEventBus>();
 
-//builder.Services.AddHostedService<PaymentCompletedRabbitConsumer>();
-
+builder.Services.AddHostedService<PaymentCompletedRabbitConsumer>();
+ 
 
 builder.Services.AddSingleton(sp =>
 {
