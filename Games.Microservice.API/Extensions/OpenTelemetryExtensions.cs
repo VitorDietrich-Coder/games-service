@@ -9,8 +9,13 @@ namespace Games.Microservice.API.Extensions
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            var serviceName = configuration["Service:Name"] ?? "Users.Microservice";
-            var serviceVersion = "1.0.0";
+            var serviceName =
+                configuration["Service:Name"] ?? "games-microservice";
+
+            var otlpEndpoint =
+                configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]
+                ?? configuration["OpenTelemetry:OtlpEndpoint"]
+                ?? "http://localhost:4317";
 
             services.AddOpenTelemetry()
                 .WithTracing(builder =>
@@ -20,7 +25,7 @@ namespace Games.Microservice.API.Extensions
                             ResourceBuilder.CreateDefault()
                                 .AddService(
                                     serviceName: serviceName,
-                                    serviceVersion: serviceVersion))
+                                    serviceVersion: "1.0.0"))
 
                         .AddAspNetCoreInstrumentation(options =>
                         {
@@ -29,17 +34,11 @@ namespace Games.Microservice.API.Extensions
 
                         .AddHttpClientInstrumentation()
 
-                        .AddEntityFrameworkCoreInstrumentation(options =>
-                        {
-                            options.SetDbStatementForText = true;
-                        })
+                        .AddEntityFrameworkCoreInstrumentation()
 
-                        .AddConsoleExporter()
-
-                        .AddJaegerExporter(jaegerOptions =>
+                        .AddOtlpExporter(opt =>
                         {
-                            jaegerOptions.AgentHost = configuration["Jaeger:Host"] ?? "localhost";
-                            jaegerOptions.AgentPort = int.Parse(configuration["Jaeger:Port"] ?? "6831");
+                            opt.Endpoint = new Uri(otlpEndpoint);
                         });
                 });
 
