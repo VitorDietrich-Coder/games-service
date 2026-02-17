@@ -12,11 +12,11 @@ namespace Games.Microservice.Infrastructure.Elasticsearch
     {
         public static IElasticClient Create(IConfiguration config)
         {
-            var settings = new ConnectionSettings(
-                new Uri(config["Elastic:Url"]))
-                .DefaultIndex("games");
+            var settings = new ConnectionSettings(new Uri(config["ElasticSearch:Url"]))
+                              .DefaultIndex(config["ElasticSearch:Index"]);
 
             return new ElasticClient(settings);
+
         }
     }
 }
