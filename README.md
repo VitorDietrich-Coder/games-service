@@ -1,6 +1,6 @@
 # 🎮 FGC – Games Micro Service
 
-Repositório oficial do **FIAP Cloud Games (FGC)**, API backend desenvolvida em **.NET 8** como parte do **Tech Challenge FIAP – Fase 1** da FIAP.
+Repositório oficial do **FIAP Cloud Games (FGC)**, API backend desenvolvida em **.NET 9** como parte do **Tech Challenge FIAP – Fase 3** da FIAP.
 
 ## 📦 Visão Geral
 
@@ -13,7 +13,7 @@ O **FGC** simula uma **loja virtual de jogos digitais** com recursos completos d
 
 ## ⚙️ Tecnologias Utilizadas
 
-- [.NET 8 (C#)](https://learn.microsoft.com/en-us/dotnet/)
+- [.NET 9 (C#)](https://learn.microsoft.com/en-us/dotnet/)
 - [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/)
 - [SQL Server](https://www.microsoft.com/en-us/sql-server/)
 - [JWT Bearer Authentication](https://jwt.io/)
